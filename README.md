@@ -1,5 +1,4 @@
-# NYC_Taxi_Data
-Forecasting NYC Taxi Demand for Marketplace Optimisation
+# M1 Retention Factors
 
-The main question: How can we forecast yellow cab demand in NYC at a granular level to inform driver allocation and pricing strategies?
+This is a simple Logistics Odds Regression to calculate which factors impact upon M1 Retention of users.
 
