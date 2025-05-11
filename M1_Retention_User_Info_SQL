@@ -1,0 +1,22 @@
+select distinct
+    toInt32OrNull(a.user_id) as user_id,
+    e.parent_zone_name as city,
+    CASE WHEN d.id <> 0 THEN 1 ELSE 0 END AS Return_in_30_Days,
+    e.restaurantName_en as Restaurant_Name,
+    e.delivery_fee as Delivery_Fee,
+    e.`order_items_stats.items` as Items,
+    CASE WHEN e.`order_items_stats.missing_skus`> 0 THEN 1 ELSE 0 END as Missing_Item,
+    e.`ois.total_price` as Order_Value,
+    e.`ois.total_discount` as Total_Discount,
+    DATE_DIFF('Minute',e.`status_0_time`,e.status_delivered_time) as Completion_Time
+from orders.orders a
+left join orders.order_charges b ON a.charge_id = b.id
+left join orders.order_metadata c ON a.id = c.order_id AND c.key = 'USER_DELIVERED_ORDER_INDEX'
+left join orders.orders d ON a.user_id = d.user_id AND d.created_at < a.created_at + INTERVAL 30 DAY AND d.status = 6 AND d.type = 1 AND d.created_at > a.created_at
+left join honey.resturant_all_stats e ON a.id = toInt32OrNull(e.external_id)
+where 
+    a.type = 1
+    and a.status = 6
+    and c.value = '1'
+    and a.created_at < today() - INTERVAL 30 DAY
+SETTINGS max_threads=4, query_cache_nondeterministic_function_handling='save', query_cache_ttl=86400, allow_experimental_join_condition=1
